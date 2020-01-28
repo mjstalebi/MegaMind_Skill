@@ -20,7 +20,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
          # type: (HandlerInput) -> Response
          #speech_text = "what you want to search for"
          speech_text = "yes"
-         print "launch intent recived"
+         print ("launch intent recived")
 
         # handler_input.response_builder.speak(speech_text).set_card(
         #    SimpleCard("yes", speech_text)).set_should_end_session(
@@ -37,7 +37,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         speech_text = "Hello World from Javad"
-	print speech_text
+        print(speech_text)
         handler_input.response_builder.speak(speech_text).set_card(
             SimpleCard("Hello World from Javad", speech_text)).set_should_end_session(
             False)
@@ -54,7 +54,7 @@ class TranslateIntentHandler(AbstractRequestHandler):
 	#print speech_text
         slots = handler_input.request_envelope.request.intent.slots
         phrase = slots['phrase']
-        print phrase.value
+        print (phrase.value)
 #        handler_input.response_builder.speak(speech_text).set_card(
 #            SimpleCard("sure", speech_text)).set_should_end_session(
 #            True)
