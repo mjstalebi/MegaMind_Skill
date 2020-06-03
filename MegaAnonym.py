@@ -23,6 +23,47 @@ from hashlib import sha3_256
 from os import urandom
 from cryptography.hazmat.backends import default_backend
 
+
+#imported from MegaMind_text_API.py
+import threading
+import struct
+from mypipe import MyPipe
+
+
+listen_event_signal = False
+def send_cmd_to_sdk(cmd):
+	speech_recog_end_pipe.write_to_pipe(cmd)
+	return
+def wait_for_keyword_detection():
+	speech_recog_start_pipe.wait_on_pipe()
+	return
+		
+def send_start_request():
+#	print("Sendign start request from Megamind Text API")
+#	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:	
+#		s.connect( (consts.Host,consts.PortNumber_text_start_req) )
+#		s.sendall("start".encode())
+#		s.close()
+#		return
+	global pipe_start
+	pipe_start.write_to_pipe('s')
+
+def wait_for_listenning_thread(name):
+	print('wait_for_listenning_thread')
+	global listen_event_signal
+	while True:
+		wait_for_keyword_detection()
+		listen_event_signal = True
+		print("or type your cmd")
+	#	while(listen_event_signal == True):
+	#		pass
+
+
+
+
+#end
+
+
 backend = default_backend()
 class AES_Cipher:
   def __init__(self,key):
@@ -59,7 +100,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
      def handle(self, handler_input):
          # type: (HandlerInput) -> Response
          #speech_text = "what you want to search for"
-         speech_text = "Welcome to the mega secret skill. Do you want to start a secret conversation?"
+         speech_text = "Welcome to the mega mind anonymous conversation skill. Do you want to start an anonymous conversation?"
          print ("launch intent recived")
 
         # handler_input.response_builder.speak(speech_text).set_card(
@@ -76,10 +117,10 @@ class OpenIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = "Welcome to the mega secret skill. Do you want to start a secret conversation?"
+        speech_text = "Welcome to the anonymous conversation skill. Do you want to start an anonymous conversation?"
         print(speech_text)
         handler_input.response_builder.speak(speech_text).set_card(
-            SimpleCard("Welcome to the mega secret skill", speech_text)).set_should_end_session(
+            SimpleCard("Welcome to the anonymous conversation skill", speech_text)).set_should_end_session(
             False)
         return handler_input.response_builder.response
 
@@ -91,6 +132,7 @@ class SecretIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         global user_name
         global AES_engine
+        global listen_event_signal
         # type: (HandlerInput) -> Response
 	#print speech_text
         slots = handler_input.request_envelope.request.intent.slots
@@ -111,6 +153,13 @@ class SecretIntentHandler(AbstractRequestHandler):
         plain_text = AES_engine.decrypt(cypher_text_bytes)
         speech_text_plain = "You said " + plain_text + " . what next"
         print('[1] plain text ',plain_text)
+        print('sending command to skd')
+        send_start_request()
+        while(listen_event_signal == False):
+              pass
+        send_cmd_to_sdk(plain_text)
+        listen_event_signal = False
+        speech_text_plain = anonymous_payload_pipe.read_from_pipe()
         speech_text_cipher = AES_engine.encrypt(speech_text_plain)
         print('[2]')
         coded_cypher = base64.b32encode(speech_text_cipher)
@@ -120,7 +169,10 @@ class SecretIntentHandler(AbstractRequestHandler):
 #        handler_input.response_builder.speak(speech_text).set_card(
 #            SimpleCard("sure", speech_text)).set_should_end_session(
 #            True)
-        handler_input.response_builder.speak(speech_text).set_should_end_session(
+##        handler_input.response_builder.speak(speech_text).set_should_end_session(
+##            False)
+        handler_input.response_builder.speak('mega card').set_card(
+            SimpleCard('title',speech_text)).set_should_end_session(
             False)
         return handler_input.response_builder.response
 
@@ -160,6 +212,10 @@ class KeyIntentHandler(AbstractRequestHandler):
         handler_input.response_builder.speak(speech_text).set_should_end_session(
             False)
         return handler_input.response_builder.response
+import threading
+import struct
+from mypipe import MyPipe
+
 class FriendIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
@@ -323,6 +379,18 @@ sb.add_exception_handler(AllExceptionHandler())
 
 skill_obj = sb.create()
 
+global pipe_start 
+print('starting pipe start')
+pipe_start =  MyPipe('text_start_request')
+pipe_start.make()
+global speech_recog_start_pipe
+speech_recog_start_pipe = MyPipe('speech_recog_start')
+global speech_recog_end_pipe
+speech_recog_end_pipe = MyPipe('speech_recog_end')
+global anonymous_payload_pipe
+anonymous_payload_pipe  = MyPipe('anonymous_payload')
+th1 = threading.Thread(target=wait_for_listenning_thread, args=(1,), daemon=True)
+th1.start()
 if __name__ == '__main__':
     app.run(debug=True, host = '0.0.0.0')
 

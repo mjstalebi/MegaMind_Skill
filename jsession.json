@@ -1,0 +1,38 @@
+{
+  "session_name": "4-pane-split",
+  "windows": [
+    {
+      "window_name": "MegaMind development window",
+      "shell_command_before": "sleep 1",
+      "layout": "tiled",
+      "panes": [
+	{
+	   "shell_command":[
+		"sleep 5",
+		"echo run secret skill here",
+		"source run_MegaSecret.sh"
+	   ]
+	},{
+	   "shell_command":[
+		"echo run the Megamind engine here",
+		"python3.7 MegaMind_engine_anonymous.py"
+	   ]
+	},{
+	   "shell_command":[
+		"echo run ngrok here"
+	   ]
+	},{
+	   "shell_command":[
+		"sleep 7",
+		"echo run SDK here",
+		"cd ../MegaMind_device_SDK1/build/",
+		"source run.sh"
+	   ]
+	}
+      ],
+      "options_after": {
+        "mouse": true
+      }
+    }
+  ]
+}
