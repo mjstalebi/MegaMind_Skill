@@ -226,6 +226,14 @@ def main():
 	wfr_state_end_pipe = MyPipe('wfr_state_end')
 	wfr_state_end_pipe.make()
 
+	global mute_pipe
+	mute_pipe = MyPipe('mute_pipe')
+	mute_pipe.make()
+
+	global unmute_pipe
+	unmute_pipe = MyPipe('unmute_pipe')
+	unmute_pipe.make()
+
 	print('Starting threads')
 	th1 = threading.Thread(target=payload_thread, args=(1,), daemon=True)
 	th1.start()
