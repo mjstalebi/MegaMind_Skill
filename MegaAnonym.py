@@ -171,7 +171,7 @@ class SecretIntentHandler(AbstractRequestHandler):
 #            True)
 ##        handler_input.response_builder.speak(speech_text).set_should_end_session(
 ##            False)
-        handler_input.response_builder.speak('mega card').set_card(
+        handler_input.response_builder.speak('mega card this is to kill time and more').set_card(
             SimpleCard('title',speech_text)).set_should_end_session(
             False)
         return handler_input.response_builder.response
